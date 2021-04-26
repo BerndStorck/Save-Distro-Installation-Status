@@ -1,6 +1,7 @@
+/MEDIA
 #! /bin/bash
 #
-# save_status 1.0.2, 2021-04-26
+# save_status 1.0.3, 2021-04-26
 #
 # BETA: Collects several information about an actual instalaltion, that
 # might help for a new installation and the restauration of the previous
@@ -34,14 +35,14 @@ echo -e "UNTERVERZEICHNISSE IM MEDIA-VERZEICHNIS\n" > "${info_dir}subfolders_in_
 (cd /media; ls --color=none -dl */) >> "${info_dir}subfolders_in_media"
 if [ "$(which tree)" ]; then
   echo >> "${info_dir}subfolders_in_media"
-  tree -L 1/media >> "${info_dir}subfolders_in_media"
+  tree -L 1 /media >> "${info_dir}subfolders_in_media"
 fi
 
 mount | grep -E --color=none '^/dev/' | cut -d' ' -f1 > "$devices_list"
 
-echo -e "UMLEITUNGEN IM HOME-FOLDER\n" > "${info_dir}home_redirections"
-LANG=C ls --color=none -log ~ | grep --color=never "^l" |\
-awk '{for (i=7;i<=NF;i++) printf ("%s", $i)}{printf ("\n")}' >> "${info_dir}home_redirections"
+echo -e "UMLEITUNGEN IM HOME-FOLDER\n" > "home_redirections"
+find ~ -maxdepth 1 -type l -ls |\
+awk -F "${HOME}/" '{for (i=2;i<=NF;i++) printf ("%s", $i)}{printf ("\n")}' >> "home_redirections"
 
 # CONTENT OF /OPT
 echo "VERZEICHNISSE IN /opt" > "${info_dir}opt_content"

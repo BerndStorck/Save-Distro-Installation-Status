@@ -10,7 +10,7 @@ Dieses Skript ist vorläufiges Ergebnis von drei durchgeführten und einer bevor
 
 Das folgende Bildschirmfoto  dokumentiert ein Beispiel, welche Dateien das Skript erzeugt.
 
-![](/home/pejo/Linux/Shellskripte/save_status/created_folders.png)
+![](./created_folders.png)
 
 Die Dateinamen sprechen für sich und ihr Inhalt sowieso.
 

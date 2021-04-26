@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# save_status 1.0.1, 2021-04-26
+# save_status 1.0.2, 2021-04-26
 #
 # BETA: Collects several information about an actual instalaltion, that
 # might help for a new installation and the restauration of the previous
@@ -31,7 +31,7 @@ for i in {a..z}; do
 done
 
 echo -e "UNTERVERZEICHNISSE IM MEDIA-VERZEICHNIS\n" > "${info_dir}subfolders_in_media"
-(cd /media; ls -dl */) >> "${info_dir}subfolders_in_media"
+(cd /media; ls --color=none -dl */) >> "${info_dir}subfolders_in_media"
 if [ "$(which tree)" ]; then
   echo >> "${info_dir}subfolders_in_media"
   tree -L 1/media >> "${info_dir}subfolders_in_media"

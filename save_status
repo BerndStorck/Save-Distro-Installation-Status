@@ -1,4 +1,3 @@
-/MEDIA
 #! /bin/bash
 #
 # save_status 1.0.3, 2021-04-26
@@ -16,7 +15,7 @@
 info_dir="${1}/"
 devices_list="/tmp/devices"
 
-sudo :
+sudo : 2> /dev/null
 
 if [ ! -d "$1" ]; then
     sudo mkdir -p "$1"

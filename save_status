@@ -1,0 +1,73 @@
+#! /bin/bash
+#
+# save_status 1.0.0, 2021-04-25
+#
+# BETA: Collects several information about an actual instalaltion, that
+# might help for a new installation and the restauration of the previous
+# status. this ist currently a beta version.
+#
+# Works for Debian derivates, and in this version assumes that all
+# drives have names starting with "sd", like "/dev/sda1".
+#
+# Bernd Storck, https://www.facebook.com/BStLinux/
+#
+
+info_dir="${1}/"
+devices_list="/tmp/devices"
+
+cat /etc/*ease* > "${info_dir}release"
+cp -p /etc/fstab "${info_dir}"
+
+# PARTITIONEN
+> "${info_dir}partitionen"
+for i in {a..z}; do
+  (sudo lsblk -l --output NAME,MOUNTPOINT,UUID /dev/sd$i 2> /dev/null; if [ "$?" = 0 ]; then echo; fi) >> "${info_dir}partitionen"
+done
+
+echo -e "UNTERVERZEICHNISSE IM MEDIA-VERZEICHNIS\n" > "${info_dir}subfolders_in_media"
+(cd /media; ls -dl */) >> "${info_dir}subfolders_in_media"
+if [ "$(which tree)" ]; then
+  echo >> "${info_dir}subfolders_in_media"
+  tree -L 1/media >> "${info_dir}subfolders_in_media"
+fi
+
+mount | grep -E --color=none '^/dev/' | cut -d' ' -f1 > "$devices_list"
+
+echo -e "UMLEITUNGEN IM HOME-FOLDER\n" > "${info_dir}home_redirections"
+LANG=C ls --color=none -log ~ | grep --color=never "^l" |\
+awk '{for (i=7;i<=NF;i++) printf ("%s", $i)}{printf ("\n")}' >> "${info_dir}home_redirections"
+
+# CONTENT OF /OPT
+echo "VERZEICHNISSE IN /opt" > "${info_dir}opt_content"
+ls --color=none -l /opt | grep -E "^d" >> "${info_dir}opt_content"
+echo -e "\nANDERE VERZEICHNISINHALTE" >> "${info_dir}opt_content"
+if [ "$(ls --color=none -l /opt | grep -Evc "^d")" = "1" ]; then
+  echo "Keine" >> "${info_dir}opt_content"
+else
+  ls --color=none -l /opt | grep -Ev "^d" >> "${info_dir}opt_content"
+fi
+
+echo "SELEKTIV" > "${info_dir}blkid"
+blkid | grep --color=none -f "$devices_list" >> "${info_dir}blkid"
+echo -e "\nKOMPLETT" >> "${info_dir}blkid"
+blkid >> "${info_dir}blkid"
+
+echo "SELEKTIV" > "${info_dir}mounted"
+mount | grep --color=none -f "$devices_list" >> "${info_dir}mounted"
+echo -e "\nKOMPLETT" >> "${info_dir}mounted"
+mount >> "${info_dir}mounted"
+
+echo "SELEKTIV" > "${info_dir}lsblk"
+sudo lsblk -l --output NAME,FSTYPE,UUID,LABEL,MOUNTPOINT | head -n1 >> "${info_dir}lsblk"
+sudo lsblk -l --output NAME,FSTYPE,UUID,LABEL,MOUNTPOINT |\
+grep --color=none -F "$(cut -d'/' -f3 "$devices_list")" >> "${info_dir}lsblk"
+echo -e "\nKOMPLETT" >> "${info_dir}lsblk"
+lsblk >> "${info_dir}lsblk"
+
+# DIE NAMEN DER INSTALLIERTEN PROGRAMME
+dpkg -l | grep --color=none -E "^[[:alpha:]]i" | tr -s ' ' | cut -d' ' -f2 > "${info_dir}installed"
+
+# INSTALLIERTE PROGRAMME MIT KURZBEESCHREIBUNG
+dpkg -l | grep --color=none -E "^[[:alpha:]]i" | tr -s ' ' | awk '{printf ("%32s\t", $2); for (i=3; i<=NF; i++) printf("%s ",$i)}{printf ("\n") }' > "${info_dir}installed_long"
+
+ls -l "$info_dir"

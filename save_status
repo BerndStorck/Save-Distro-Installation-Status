@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# save_status 1.0.0, 2021-04-25
+# save_status 1.0.1, 2021-04-26
 #
 # BETA: Collects several information about an actual instalaltion, that
 # might help for a new installation and the restauration of the previous
@@ -14,6 +14,12 @@
 
 info_dir="${1}/"
 devices_list="/tmp/devices"
+
+sudo :
+
+if [ ! -d "$1" ]; then
+    sudo mkdir -p "$1"
+fi
 
 cat /etc/*ease* > "${info_dir}release"
 cp -p /etc/fstab "${info_dir}"
